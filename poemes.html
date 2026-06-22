@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poèmes — Robert veille sur vous</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #f7f5f0;
+      min-height: 100vh;
+      font-family: Georgia, serif;
+      padding: 3rem 1.5rem;
+      color: #2a2a2a;
+    }
+    header {
+      max-width: 620px;
+      margin: 0 auto 2.5rem;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: normal;
+      letter-spacing: 0.02em;
+    }
+    header a {
+      font-size: 0.85rem;
+      color: #2a2a2a;
+      text-decoration: none;
+      border-bottom: 1px solid #2a2a2a;
+      padding-bottom: 1px;
+      transition: opacity 0.2s;
+    }
+    header a:hover { opacity: 0.5; }
+
+    #liste {
+      max-width: 620px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .poeme-btn {
+      background: none;
+      border: none;
+      border-bottom: 1px solid #ccc;
+      padding: 0.7rem 0;
+      text-align: left;
+      font-family: Georgia, serif;
+      font-size: 1rem;
+      color: #2a2a2a;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .poeme-btn:hover { opacity: 0.5; }
+    .poeme-btn .fleche { font-size: 0.8rem; color: #999; }
+
+    #vue {
+      max-width: 620px;
+      margin: 0 auto;
+      display: none;
+    }
+    #vue-retour {
+      background: none;
+      border: none;
+      font-family: Georgia, serif;
+      font-size: 0.85rem;
+      color: #2a2a2a;
+      cursor: pointer;
+      border-bottom: 1px solid #2a2a2a;
+      padding-bottom: 1px;
+      margin-bottom: 2rem;
+      transition: opacity 0.2s;
+    }
+    #vue-retour:hover { opacity: 0.5; }
+    #vue-titre {
+      font-size: 1.2rem;
+      font-weight: normal;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.02em;
+    }
+    #vue-contenu {
+      font-size: 1rem;
+      line-height: 1.9;
+      white-space: pre-wrap;
+      color: #333;
+    }
+
+    #chargement {
+      max-width: 620px;
+      margin: 0 auto;
+      color: #999;
+      font-size: 0.9rem;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Poèmes</h1>
+    <a href="index.html">← Retour</a>
+  </header>
+
+  <div id="chargement">Chargement…</div>
+  <div id="liste"></div>
+  <div id="vue">
+    <button id="vue-retour">← Liste</button>
+    <h2 id="vue-titre"></h2>
+    <pre id="vue-contenu"></pre>
+  </div>
+
+  <script>
+    const liste  = document.getElementById('liste');
+    const vue    = document.getElementById('vue');
+    const charge = document.getElementById('chargement');
+
+    // ── Charger la liste des poèmes depuis poemes.json ────────
+    fetch('poemes.json')
+      .then(r => r.json())
+      .then(poemes => {
+        charge.style.display = 'none';
+        if (!poemes.length) {
+          charge.style.display = 'block';
+          charge.textContent = 'Aucun poème pour l\'instant.';
+          return;
+        }
+        poemes.forEach(p => {
+          const btn = document.createElement('button');
+          btn.className = 'poeme-btn';
+          btn.innerHTML = `<span>${p.titre}</span><span class="fleche">→</span>`;
+          btn.addEventListener('click', () => afficher(p));
+          liste.appendChild(btn);
+        });
+      })
+      .catch(() => {
+        charge.textContent = 'Impossible de charger la liste des poèmes.';
+      });
+
+    // ── Afficher un poème ─────────────────────────────────────
+    function afficher(p) {
+      fetch(p.fichier)
+        .then(r => r.text())
+        .then(texte => {
+          document.getElementById('vue-titre').textContent = p.titre;
+          document.getElementById('vue-contenu').textContent = texte;
+          liste.style.display = 'none';
+          vue.style.display   = 'block';
+        });
+    }
+
+    // ── Retour à la liste ─────────────────────────────────────
+    document.getElementById('vue-retour').addEventListener('click', () => {
+      vue.style.display   = 'none';
+      liste.style.display = 'flex';
+    });
+  </script>
+</body>
+</html>

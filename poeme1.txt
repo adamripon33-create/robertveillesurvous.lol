@@ -1,0 +1,5 @@
+Voici le texte de votre premier poème.
+Remplacez ces lignes par vos propres vers.
+
+Chaque saut de ligne sera respecté
+tel que vous l'écrivez.
