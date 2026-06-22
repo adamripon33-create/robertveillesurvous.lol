@@ -4,40 +4,60 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Robert veille sur vous</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
       background: #f7f5f0;
       min-height: 100vh;
+      font-family: Georgia, serif;
+      padding: 2rem 1rem;
+    }
+
+    /* ── Grille principale ── */
+    .grille {
+      display: grid;
+      grid-template-columns: 1fr 420px 1fr;
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    /* ── Colonne centrale ── */
+    .centre {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      font-family: Georgia, serif;
-      padding: 2rem;
     }
-    img {
+    .centre img {
       max-width: 100%;
-      max-height: 80vh;
       display: block;
     }
-    a {
+    .liens {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      margin-top: 1.5rem;
+    }
+    .liens a {
       display: inline-block;
-      margin-top: 2rem;
       color: #2a2a2a;
-      font-size: 1rem;
+      font-size: 0.95rem;
       text-decoration: none;
       border-bottom: 1px solid #2a2a2a;
       padding-bottom: 2px;
       transition: opacity 0.2s;
     }
-    a:hover { opacity: 0.5; }
+    .liens a:hover { opacity: 0.5; }
 
     /* ── Widget bourse ── */
     #bourse {
-      margin-top: 2.5rem;
+      margin-top: 1.5rem;
       width: 100%;
-      max-width: 560px;
       background: #1a1a1a;
       border-radius: 8px;
       padding: 1rem 1.2rem 1.2rem;
@@ -51,17 +71,287 @@
       align-items: baseline;
       margin-bottom: 0.4rem;
     }
-    #bourse-title {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: #888;
-    }
-    #bourse-ticker {
-      font-size: 0.7rem;
-      color: #555;
-    }
+    #bourse-title  { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: #888; }
+    #bourse-ticker { font-size: 0.7rem; color: #555; }
     #bourse-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      margin-bottom: 0.2rem;
+    }
+    #bourse-price  { font-size: 2rem; font-weight: bold; letter-spacing: -0.02em; }
+    #bourse-unit   { font-size: 0.8rem; color: #888; }
+    #bourse-change { font-size: 0.85rem; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .up   { color: #00e676; background: rgba(0,230,118,0.12); }
+    .down { color: #ff5252; background: rgba(255,82,82,0.12); }
+    #bourse-canvas-wrap { width: 100%; height: 90px; margin: 0.7rem 0 0.5rem; }
+    #bourse-canvas { width: 100%; height: 100%; }
+    #bourse-footer { display: flex; justify-content: space-between; font-size: 0.65rem; color: #555; }
+    #bourse-status { display: flex; align-items: center; gap: 0.3rem; }
+    #bourse-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #00e676;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+    #bourse-msg { font-size: 0.68rem; color: #666; margin-top: 0.4rem; min-height: 1em; font-style: italic; }
+
+    /* ── Colonnes latérales ── */
+    .colonne {
+      font-family: 'EB Garamond', Garamond, serif;
+      padding-top: 0.5rem;
+    }
+
+    .banderole {
+      background: #2a2a2a;
+      color: #f7f5f0;
+      text-align: center;
+      padding: 0.45rem 0.8rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-radius: 3px;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+    .banderole em {
+      font-style: italic;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    /* Hot take */
+    #hot-take-contenu {
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: #2a2a2a;
+      white-space: pre-wrap;
+    }
+    #hot-take-contenu.chargement { color: #aaa; font-style: italic; font-size: 0.9rem; }
+
+    /* Robert d'or */
+    #robert-or-liste {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+    .prime {
+      border-left: 2px solid #c8a84b;
+      padding-left: 0.8rem;
+    }
+    .prime-nom {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #2a2a2a;
+    }
+    .prime-raison {
+      font-size: 0.95rem;
+      color: #555;
+      line-height: 1.6;
+      margin-top: 0.15rem;
+      font-style: italic;
+    }
+    #robert-or-liste.chargement { color: #aaa; font-style: italic; font-size: 0.9rem; }
+
+    /* ── Responsive ── */
+    @media (max-width: 860px) {
+      .grille {
+        grid-template-columns: 1fr;
+      }
+      .colonne { padding-top: 0; }
+      .col-gauche { order: 2; }
+      .centre     { order: 1; }
+      .col-droite { order: 3; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grille">
+
+    <!-- ── Colonne gauche : Hot Take ── -->
+    <div class="colonne col-gauche">
+      <div class="banderole">La <em>hot take</em> du moment</div>
+      <div id="hot-take-contenu" class="chargement">Chargement…</div>
+    </div>
+
+    <!-- ── Centre : Robert + bourse + liens ── -->
+    <div class="centre">
+      <img src="Robert.jpg" alt="Robert">
+
+      <div id="bourse">
+        <div id="bourse-header">
+          <span id="bourse-title">📈 Cours du Point Sourire</span>
+          <span id="bourse-ticker">PTS · Euronext Gaulois</span>
+        </div>
+        <div id="bourse-price-row">
+          <span id="bourse-price">—</span>
+          <span id="bourse-unit">pts/sourire</span>
+          <span id="bourse-change" class="up">—</span>
+        </div>
+        <div id="bourse-canvas-wrap">
+          <canvas id="bourse-canvas"></canvas>
+        </div>
+        <div id="bourse-footer">
+          <div id="bourse-status"><div id="bourse-dot"></div> Marché ouvert</div>
+          <span>Vol. <span id="bourse-vol">—</span> sourires</span>
+        </div>
+        <div id="bourse-msg">Analyse technique en cours…</div>
+      </div>
+
+      <div class="liens">
+        <a href="https://qbc.fr" target="_blank" rel="noopener">Pour gazouiller gaiement</a>
+        <a href="poemes.html">Créations</a>
+      </div>
+    </div>
+
+    <!-- ── Colonne droite : Robert d'or ── -->
+    <div class="colonne col-droite">
+      <div class="banderole">Les primés au Robert d'or</div>
+      <div id="robert-or-liste" class="chargement">Chargement…</div>
+    </div>
+
+  </div>
+
+  <script>
+    /* ══════════════════════════════════════════
+       BOURSE
+    ══════════════════════════════════════════ */
+    const HISTORY = 60;
+    const INTERVAL = 1200;
+    const BASE = 42.0;
+
+    const MESSAGES = [
+      "Fort soutien des acheteurs de bonne humeur.",
+      "Résistance rencontrée au seuil des 😬.",
+      "RSI en zone de surbonheur — prudence.",
+      "Signal haussier détecté dans la région des zygomatiques.",
+      "Vague d'Elliott confirmée : sourire impulsif attendu.",
+      "MACD croise à la hausse sur fond de blagues de Robert.",
+      "Correction technique après un pic d'enthousiasme non justifié.",
+      "Les institutionnels accumulent discrètement.",
+      "Breakout au-dessus de la moyenne mobile 20 jours.",
+      "Bougie doji — indécision sur le marché de la joie.",
+      "Volume anormalement élevé — rumeur d'un discours de Robert.",
+      "Le Point Sourire surperforme le CAC Bonne Mine.",
+      "Gap haussier non comblé depuis le dernier barbecue.",
+      "Prise de profit partielle des investisseurs prudents.",
+      "Divergence baissière sur le MACD des bisous.",
+    ];
+
+    const bHistory = Array.from({length: HISTORY}, () => BASE);
+    let current = BASE, prevPrice = BASE;
+
+    const priceEl  = document.getElementById('bourse-price');
+    const changeEl = document.getElementById('bourse-change');
+    const volEl    = document.getElementById('bourse-vol');
+    const msgEl    = document.getElementById('bourse-msg');
+    const canvas   = document.getElementById('bourse-canvas');
+    const ctx      = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      const wrap = document.getElementById('bourse-canvas-wrap');
+      canvas.width  = wrap.clientWidth  * devicePixelRatio;
+      canvas.height = wrap.clientHeight * devicePixelRatio;
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+      draw();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function draw() {
+      const W = canvas.width / devicePixelRatio;
+      const H = canvas.height / devicePixelRatio;
+      ctx.clearRect(0, 0, W, H);
+      const min = Math.min(...bHistory) - 0.5;
+      const max = Math.max(...bHistory) + 0.5;
+      const range = max - min || 1;
+      const toX = i => (i / (HISTORY - 1)) * W;
+      const toY = v => H - ((v - min) / range) * H * 0.88 - H * 0.06;
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.lineWidth = 1;
+      for (let g = 0; g <= 3; g++) {
+        const y = H * 0.06 + (H * 0.88 / 3) * g;
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      }
+      const isUp = current >= prevPrice;
+      const colorMain = isUp ? '#00e676' : '#ff5252';
+      const colorFill = isUp ? 'rgba(0,230,118,0.15)' : 'rgba(255,82,82,0.15)';
+      ctx.beginPath();
+      ctx.moveTo(toX(0), H);
+      bHistory.forEach((v, i) => ctx.lineTo(toX(i), toY(v)));
+      ctx.lineTo(toX(HISTORY - 1), H);
+      ctx.closePath();
+      ctx.fillStyle = colorFill;
+      ctx.fill();
+      ctx.beginPath();
+      bHistory.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
+      ctx.strokeStyle = colorMain;
+      ctx.lineWidth = 1.8;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+      const lastX = toX(HISTORY - 1);
+      const lastY = toY(bHistory[HISTORY - 1]);
+      ctx.beginPath();
+      ctx.arc(lastX, lastY, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = colorMain;
+      ctx.fill();
+    }
+
+    function tick() {
+      prevPrice = current;
+      const t = Date.now() / 8000;
+      current = Math.max(1, current + Math.sin(t) * 0.08 + (Math.random() - 0.48) * 0.6);
+      bHistory.shift(); bHistory.push(current);
+      priceEl.textContent = current.toFixed(2);
+      const diff = current - prevPrice;
+      const pct  = (diff / prevPrice * 100).toFixed(2);
+      changeEl.textContent = `${diff >= 0 ? '+' : ''}${pct}%`;
+      changeEl.className   = 'bourse-change ' + (diff >= 0 ? 'up' : 'down');
+      volEl.textContent = (Math.floor(Math.random() * 900 + 100) * 1000).toLocaleString('fr-FR');
+      if (Math.random() < 0.13)
+        msgEl.textContent = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
+      draw();
+    }
+
+    resizeCanvas();
+    tick();
+    setInterval(tick, INTERVAL);
+
+    /* ══════════════════════════════════════════
+       HOT TAKE
+    ══════════════════════════════════════════ */
+    fetch('hot-take.txt')
+      .then(r => r.text())
+      .then(texte => {
+        const el = document.getElementById('hot-take-contenu');
+        el.textContent = texte.trim();
+        el.classList.remove('chargement');
+      })
+      .catch(() => {
+        document.getElementById('hot-take-contenu').textContent = '—';
+      });
+
+    /* ══════════════════════════════════════════
+       ROBERT D'OR
+    ══════════════════════════════════════════ */
+    fetch('robert-or.json')
+      .then(r => r.json())
+      .then(liste => {
+        const el = document.getElementById('robert-or-liste');
+        el.classList.remove('chargement');
+        el.innerHTML = '';
+        liste.forEach(p => {
+          const div = document.createElement('div');
+          div.className = 'prime';
+          div.innerHTML = `<div class="prime-nom">🏅 ${p.nom}</div><div class="prime-raison">${p.raison}</div>`;
+          el.appendChild(div);
+        });
+      })
+      .catch(() => {
+        document.getElementById('robert-or-liste').textContent = '—';
+      });
+  </script>
+</body>
+</html>    #bourse-price-row {
       display: flex;
       align-items: baseline;
       gap: 0.6rem;
