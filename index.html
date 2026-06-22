@@ -100,6 +100,9 @@
     .colonne {
       font-family: 'EB Garamond', Garamond, serif;
       padding-top: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
     }
 
     .banderole {
@@ -116,9 +119,14 @@
     }
     .banderole em {
       font-style: italic;
-      text-transform: uppercase;
+      text-transform: none;
       letter-spacing: 0;
     }
+    .banderole .flamme {
+      display: inline-block;
+      animation: clignote 1s ease-in-out infinite;
+    }
+    @keyframes clignote { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
     /* Hot take */
     #hot-take-contenu {
@@ -133,7 +141,49 @@
       color: #aaa;
       font-style: italic;
       font-size: 0.9rem;
-      text-transform: none;
+    }
+
+    /* ── Compteur cheval ── */
+    #cheval-bloc {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    #cheval-emoji {
+      font-size: 4rem;
+      line-height: 1;
+    }
+    #cheval-question {
+      font-size: 0.95rem;
+      text-align: center;
+      color: #2a2a2a;
+      line-height: 1.5;
+      font-style: italic;
+    }
+    #cheval-btn {
+      background: #2a2a2a;
+      color: #f7f5f0;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem 1.1rem;
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    #cheval-btn:hover { opacity: 0.7; }
+    #cheval-compteur {
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: #2a2a2a;
+      letter-spacing: -0.02em;
+    }
+    #cheval-label {
+      font-size: 0.75rem;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
     }
 
     /* Robert d'or */
@@ -160,6 +210,30 @@
     }
     #robert-or-liste.chargement { color: #aaa; font-style: italic; font-size: 0.9rem; }
 
+    /* Recettes */
+    #recettes-liste {
+      display: flex;
+      flex-direction: column;
+      gap: 1.3rem;
+    }
+    .recette {
+      border-left: 2px solid #a0522d;
+      padding-left: 0.8rem;
+    }
+    .recette-titre {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #2a2a2a;
+    }
+    .recette-corps {
+      font-size: 0.95rem;
+      color: #555;
+      line-height: 1.65;
+      margin-top: 0.3rem;
+      white-space: pre-wrap;
+    }
+    #recettes-liste.chargement { color: #aaa; font-style: italic; font-size: 0.9rem; }
+
     /* ── Responsive ── */
     @media (max-width: 860px) {
       .grille { grid-template-columns: 1fr; }
@@ -168,23 +242,30 @@
       .centre     { order: 1; }
       .col-droite { order: 3; }
     }
-    .banderole .flamme {
-  display: inline-block;
-  animation: clignote 1s ease-in-out infinite;
-}
-@keyframes clignote {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
-}
   </style>
 </head>
 <body>
   <div class="grille">
 
-    <!-- ── Colonne gauche : Hot Take ── -->
+    <!-- ── Colonne gauche : Hot Take + Compteur cheval ── -->
     <div class="colonne col-gauche">
-      <div class="banderole">🔥 La <em>hot take</em> du moment</div>
-      <div id="hot-take-contenu" class="chargement">Chargement…</div>
+
+      <div>
+        <div class="banderole"><span class="flamme">🔥</span> La <em>HOT TAKE</em> (ou « chaude prise ») du moment</div>
+        <div id="hot-take-contenu" class="chargement">Chargement…</div>
+      </div>
+
+      <div>
+        <div class="banderole">🐴 Cheval mal harnaché</div>
+        <div id="cheval-bloc">
+          <div id="cheval-emoji">🐴</div>
+          <div id="cheval-question">Avez-vous croisé un cheval mal harnaché aujourd'hui ?</div>
+          <button id="cheval-btn">Oui, j'en ai croisé un</button>
+          <div id="cheval-compteur">0</div>
+          <div id="cheval-label">croisements signalés</div>
+        </div>
+      </div>
+
     </div>
 
     <!-- ── Centre : Robert + bourse + liens ── -->
@@ -217,10 +298,19 @@
       </div>
     </div>
 
-    <!-- ── Colonne droite : Robert d'or ── -->
+    <!-- ── Colonne droite : Robert d'or + Recettes ── -->
     <div class="colonne col-droite">
-      <div class="banderole">Les primés au Robert d'or</div>
-      <div id="robert-or-liste" class="chargement">Chargement…</div>
+
+      <div>
+        <div class="banderole">Les primés au Robert d'or</div>
+        <div id="robert-or-liste" class="chargement">Chargement…</div>
+      </div>
+
+      <div>
+        <div class="banderole">🍽️ Recettes</div>
+        <div id="recettes-liste" class="chargement">Chargement…</div>
+      </div>
+
     </div>
 
   </div>
@@ -359,6 +449,22 @@
       });
 
     /* ══════════════════════════════════════════
+       COMPTEUR CHEVAL
+    ══════════════════════════════════════════ */
+    let chevalCount = parseInt(localStorage.getItem('cheval-count') || '0');
+    const compteurEl = document.getElementById('cheval-compteur');
+    compteurEl.textContent = chevalCount;
+
+    document.getElementById('cheval-btn').addEventListener('click', () => {
+      chevalCount++;
+      compteurEl.textContent = chevalCount;
+      localStorage.setItem('cheval-count', chevalCount);
+      const emoji = document.getElementById('cheval-emoji');
+      emoji.style.transform = 'scale(1.3)';
+      setTimeout(() => emoji.style.transform = 'scale(1)', 200);
+    });
+
+    /* ══════════════════════════════════════════
        ROBERT D'OR
     ══════════════════════════════════════════ */
     fetch('robert-or.json')
@@ -376,6 +482,26 @@
       })
       .catch(() => {
         document.getElementById('robert-or-liste').textContent = '—';
+      });
+
+    /* ══════════════════════════════════════════
+       RECETTES
+    ══════════════════════════════════════════ */
+    fetch('recettes.json')
+      .then(r => r.json())
+      .then(liste => {
+        const el = document.getElementById('recettes-liste');
+        el.classList.remove('chargement');
+        el.innerHTML = '';
+        liste.forEach(r => {
+          const div = document.createElement('div');
+          div.className = 'recette';
+          div.innerHTML = `<div class="recette-titre">🍴 ${r.titre}</div><div class="recette-corps">${r.corps}</div>`;
+          el.appendChild(div);
+        });
+      })
+      .catch(() => {
+        document.getElementById('recettes-liste').textContent = '—';
       });
   </script>
 </body>
