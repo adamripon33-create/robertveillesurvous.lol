@@ -32,10 +32,263 @@
       transition: opacity 0.2s;
     }
     a:hover { opacity: 0.5; }
+
+    /* ── Widget bourse ── */
+    #bourse {
+      margin-top: 2.5rem;
+      width: 100%;
+      max-width: 560px;
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 1rem 1.2rem 1.2rem;
+      color: #e8e8e8;
+      font-family: 'Courier New', monospace;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+    #bourse-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.4rem;
+    }
+    #bourse-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #888;
+    }
+    #bourse-ticker {
+      font-size: 0.7rem;
+      color: #555;
+    }
+    #bourse-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      margin-bottom: 0.2rem;
+    }
+    #bourse-price {
+      font-size: 2rem;
+      font-weight: bold;
+      letter-spacing: -0.02em;
+    }
+    #bourse-unit {
+      font-size: 0.8rem;
+      color: #888;
+    }
+    #bourse-change {
+      font-size: 0.85rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+    }
+    .up   { color: #00e676; background: rgba(0,230,118,0.12); }
+    .down { color: #ff5252; background: rgba(255,82,82,0.12); }
+
+    #bourse-canvas-wrap {
+      position: relative;
+      width: 100%;
+      height: 90px;
+      margin: 0.7rem 0 0.5rem;
+    }
+    #bourse-canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    #bourse-footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      color: #555;
+    }
+    #bourse-status {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    #bourse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #00e676;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.2; }
+    }
+    #bourse-msg {
+      font-size: 0.68rem;
+      color: #666;
+      margin-top: 0.4rem;
+      min-height: 1em;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
   <img src="Robert.jpg" alt="Robert">
+
+  <!-- Widget cours de bourse du Point Sourire -->
+  <div id="bourse">
+    <div id="bourse-header">
+      <span id="bourse-title">📈 Cours du Point Sourire</span>
+      <span id="bourse-ticker">PTS · Euronext Gaulois</span>
+    </div>
+    <div id="bourse-price-row">
+      <span id="bourse-price">—</span>
+      <span id="bourse-unit">pts/sourire</span>
+      <span id="bourse-change" class="up">—</span>
+    </div>
+    <div id="bourse-canvas-wrap">
+      <canvas id="bourse-canvas"></canvas>
+    </div>
+    <div id="bourse-footer">
+      <div id="bourse-status"><div id="bourse-dot"></div> Marché ouvert</div>
+      <span>Vol. <span id="bourse-vol">—</span> sourires</span>
+    </div>
+    <div id="bourse-msg">Analyse technique en cours…</div>
+  </div>
+
   <a href="https://qbc.fr" target="_blank" rel="noopener">Pour gazouiller gaiement</a>
+
+  <script>
+    // ── Configuration ──────────────────────────────────────────
+    const HISTORY = 60;        // points sur le graphe
+    const INTERVAL = 1200;     // ms entre chaque tick
+    const BASE = 42.0;         // valeur de départ
+
+    const MESSAGES = [
+      "Fort soutien des acheteurs de bonne humeur.",
+      "Résistance rencontrée au seuil des 😬.",
+      "RSI en zone de surbonheur — prudence.",
+      "Signal haussier détecté dans la région des zygomatiques.",
+      "Vague d'Elliott confirmée : sourire impulsif attendu.",
+      "MACD croise à la hausse sur fond de blagues de Robert.",
+      "Correction technique après un pic d'enthousiasme non justifié.",
+      "Les institutionnels accumulent discrètement.",
+      "Breakout au-dessus de la moyenne mobile 20 jours.",
+      "Bougie doji — indécision sur le marché de la joie.",
+      "Volume anormalement élevé — rumeur d'un discours de Robert.",
+      "Le Point Sourire surperforme le CAC Bonne Mine.",
+      "Gap haussier non comblé depuis le dernier barbecue.",
+      "Prise de profit partielle des investisseurs prudents.",
+      "Divergence baissière sur le MACD des bisous.",
+    ];
+
+    // ── État ───────────────────────────────────────────────────
+    const history = Array.from({length: HISTORY}, () => BASE);
+    let current = BASE;
+    let prevPrice = BASE;
+
+    // ── DOM ────────────────────────────────────────────────────
+    const priceEl  = document.getElementById('bourse-price');
+    const changeEl = document.getElementById('bourse-change');
+    const volEl    = document.getElementById('bourse-vol');
+    const msgEl    = document.getElementById('bourse-msg');
+    const canvas   = document.getElementById('bourse-canvas');
+    const ctx      = canvas.getContext('2d');
+
+    // ── Resize canvas ──────────────────────────────────────────
+    function resizeCanvas() {
+      const wrap = document.getElementById('bourse-canvas-wrap');
+      canvas.width  = wrap.clientWidth  * devicePixelRatio;
+      canvas.height = wrap.clientHeight * devicePixelRatio;
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+      draw();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    // ── Dessin du graphe ───────────────────────────────────────
+    function draw() {
+      const W = canvas.width  / devicePixelRatio;
+      const H = canvas.height / devicePixelRatio;
+      ctx.clearRect(0, 0, W, H);
+
+      const min = Math.min(...history) - 0.5;
+      const max = Math.max(...history) + 0.5;
+      const range = max - min || 1;
+
+      const toX = i => (i / (HISTORY - 1)) * W;
+      const toY = v => H - ((v - min) / range) * H * 0.88 - H * 0.06;
+
+      // Grille horizontale légère
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.lineWidth = 1;
+      for (let g = 0; g <= 3; g++) {
+        const y = H * 0.06 + (H * 0.88 / 3) * g;
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      }
+
+      // Aire sous la courbe
+      const isUp = current >= prevPrice;
+      const colorMain = isUp ? '#00e676' : '#ff5252';
+      const colorFill = isUp ? 'rgba(0,230,118,0.15)' : 'rgba(255,82,82,0.15)';
+
+      ctx.beginPath();
+      ctx.moveTo(toX(0), H);
+      history.forEach((v, i) => ctx.lineTo(toX(i), toY(v)));
+      ctx.lineTo(toX(HISTORY - 1), H);
+      ctx.closePath();
+      ctx.fillStyle = colorFill;
+      ctx.fill();
+
+      // Ligne principale
+      ctx.beginPath();
+      history.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
+      ctx.strokeStyle = colorMain;
+      ctx.lineWidth = 1.8;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      // Point courant
+      const lastX = toX(HISTORY - 1);
+      const lastY = toY(history[HISTORY - 1]);
+      ctx.beginPath();
+      ctx.arc(lastX, lastY, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = colorMain;
+      ctx.fill();
+    }
+
+    // ── Tick de marché ─────────────────────────────────────────
+    function tick() {
+      prevPrice = current;
+
+      // Mouvement aléatoire avec légère tendance sinusoïdale
+      const t = Date.now() / 8000;
+      const trend = Math.sin(t) * 0.08;
+      const noise = (Math.random() - 0.48) * 0.6;
+      current = Math.max(1, current + trend + noise);
+
+      history.shift();
+      history.push(current);
+
+      // Affichage prix
+      priceEl.textContent = current.toFixed(2);
+
+      // Variation
+      const diff = current - prevPrice;
+      const pct  = (diff / prevPrice * 100).toFixed(2);
+      const sign = diff >= 0 ? '+' : '';
+      changeEl.textContent = `${sign}${pct}%`;
+      changeEl.className   = 'bourse-change ' + (diff >= 0 ? 'up' : 'down');
+
+      // Volume fictif
+      const vol = Math.floor(Math.random() * 900 + 100) * 1000;
+      volEl.textContent = vol.toLocaleString('fr-FR');
+
+      // Message aléatoire (toutes les ~8 ticks)
+      if (Math.random() < 0.13) {
+        msgEl.textContent = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
+      }
+
+      draw();
+    }
+
+    // ── Init ───────────────────────────────────────────────────
+    resizeCanvas();
+    tick();
+    setInterval(tick, INTERVAL);
+  </script>
 </body>
 </html>
