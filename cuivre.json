@@ -2,7 +2,7 @@
   {
     "nom": "Créations",
     "desc": "Poèmes, textes & autres façonnages",
-    "url": "poemes.html",
+    "url": "creations.html",
     "externe": false
   },
   {
@@ -12,13 +12,19 @@
     "externe": true
   },
   {
-    "nom": "Mine d'idées I",
+    "nom": "Recevoir un Robert",
+    "desc": "Robert vous sera acheminé sous pli discret",
+    "url": "recevoir-robert.html",
+    "externe": false
+  },
+  {
+    "nom": "Atelier I",
     "desc": "Cuivre en cours d'extraction",
     "url": "atelier-1.html",
     "externe": false
   },
   {
-    "nom": "Mines d'idées II",
+    "nom": "Atelier II",
     "desc": "Cuivre en cours d'extraction",
     "url": "atelier-2.html",
     "externe": false
