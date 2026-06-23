@@ -301,6 +301,29 @@
     }
     #recettes-liste.chargement { color: #aaa; font-style: italic; font-size: 0.9rem; }
 
+    /* Petites annonces */
+    #annonces-liste {
+      display: flex;
+      flex-direction: column;
+      gap: 1.3rem;
+    }
+    .annonce {
+      border-left: 2px solid #5a7a9a;
+      padding-left: 0.8rem;
+    }
+    .annonce-auteur {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #2a2a2a;
+    }
+    .annonce-corps {
+      font-size: 0.95rem;
+      color: #555;
+      line-height: 1.65;
+      margin-top: 0.3rem;
+    }
+    #annonces-liste.chargement { color: #aaa; font-style: italic; font-size: 0.9rem; }
+
     /* ── Responsive ── */
     @media (max-width: 860px) {
       .grille { grid-template-columns: 1fr; }
@@ -389,6 +412,11 @@
       <div>
         <div class="banderole">🍽️ Recettes</div>
         <div id="recettes-liste" class="chargement">Chargement…</div>
+      </div>
+
+      <div>
+        <div class="banderole">📌 Petites annonces</div>
+        <div id="annonces-liste" class="chargement">Chargement…</div>
       </div>
 
     </div>
@@ -614,6 +642,26 @@
       })
       .catch(() => {
         document.getElementById('recettes-liste').textContent = '—';
+      });
+
+    /* ══════════════════════════════════════════
+       PETITES ANNONCES
+    ══════════════════════════════════════════ */
+    fetch('annonces.json')
+      .then(r => r.json())
+      .then(liste => {
+        const el = document.getElementById('annonces-liste');
+        el.classList.remove('chargement');
+        el.innerHTML = '';
+        liste.forEach(a => {
+          const div = document.createElement('div');
+          div.className = 'annonce';
+          div.innerHTML = `<div class="annonce-auteur">📌 ${a.auteur}</div><div class="annonce-corps">${a.corps}</div>`;
+          el.appendChild(div);
+        });
+      })
+      .catch(() => {
+        document.getElementById('annonces-liste').textContent = '—';
       });
   </script>
 
