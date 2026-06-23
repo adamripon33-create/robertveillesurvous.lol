@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recevoir un Robert — Robert veille sur vous</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #f7f5f0;
+      min-height: 100vh;
+      font-family: 'EB Garamond', Garamond, serif;
+      padding: 3rem 1.5rem 5rem;
+      color: #2a2a2a;
+    }
+    .page { max-width: 480px; margin: 0 auto; }
+
+    .retour {
+      display: inline-block;
+      font-size: 0.85rem;
+      color: #2a2a2a;
+      text-decoration: none;
+      border-bottom: 1px solid #2a2a2a;
+      padding-bottom: 1px;
+      margin-bottom: 2.5rem;
+      transition: opacity 0.2s;
+    }
+    .retour:hover { opacity: 0.5; }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+    }
+    .chapeau {
+      font-size: 1.05rem;
+      color: #777;
+      font-style: italic;
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #999;
+      margin-bottom: 0.5rem;
+    }
+    input[type="email"] {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid #ccc;
+      background: transparent;
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 1.1rem;
+      color: #2a2a2a;
+      padding: 0.4rem 0;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="email"]:focus { border-bottom-color: #2a2a2a; }
+
+    button[type="submit"] {
+      margin-top: 1.8rem;
+      background: #2a2a2a;
+      color: #f7f5f0;
+      border: none;
+      border-radius: 3px;
+      padding: 0.6rem 1.4rem;
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button[type="submit"]:hover { opacity: 0.7; }
+    button[type="submit"]:disabled { opacity: 0.4; cursor: default; }
+
+    #msg {
+      margin-top: 1.5rem;
+      font-size: 0.95rem;
+      font-style: italic;
+      min-height: 1.4em;
+      color: #555;
+    }
+    #msg.succes { color: #2a7a2a; }
+    #msg.erreur { color: #a03030; }
+
+    .nota {
+      margin-top: 3rem;
+      font-size: 0.8rem;
+      color: #bbb;
+      font-style: italic;
+      line-height: 1.6;
+      border-top: 1px solid #e0ddd8;
+      padding-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <a href="index.html" class="retour">← Retour</a>
+
+    <h1>Recevoir un Robert</h1>
+    <p class="chapeau">
+      Renseignez votre adresse électronique ci-dessous.<br>
+      Robert vous sera acheminé dans les meilleurs délais.
+    </p>
+
+    <form id="form-robert">
+      <label for="email">Votre adresse e-mail</label>
+      <input type="email" id="email" name="to_email" placeholder="vous@exemple.fr" required>
+      <button type="submit" id="btn-envoyer">Recevoir Robert</button>
+    </form>
+
+    <div id="msg"></div>
+
+    <p class="nota">
+      Robert ne sera pas revendu à des tiers, ne fera pas l'objet d'une titrisation,
+      et ne constitue pas un conseil juridique. Voir mentions légales.
+    </p>
+  </div>
+
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    // ── À REMPLIR AVEC TES IDENTIFIANTS EMAILJS ──────────────
+    const EMAILJS_PUBLIC_KEY  = 'REMPLACE_PAR_TA_PUBLIC_KEY';
+    const EMAILJS_SERVICE_ID  = 'REMPLACE_PAR_TON_SERVICE_ID';
+    const EMAILJS_TEMPLATE_ID = 'REMPLACE_PAR_TON_TEMPLATE_ID';
+    // ─────────────────────────────────────────────────────────
+
+    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+    document.getElementById('form-robert').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-envoyer');
+      const msg = document.getElementById('msg');
+      const email = document.getElementById('email').value.trim();
+
+      btn.disabled = true;
+      btn.textContent = 'Envoi en cours…';
+      msg.textContent = '';
+      msg.className = '';
+
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_email: email })
+        .then(() => {
+          msg.textContent = 'Robert est en route. Il veille déjà sur vous.';
+          msg.className = 'succes';
+          btn.textContent = 'Envoyé';
+          document.getElementById('email').value = '';
+        })
+        .catch(() => {
+          msg.textContent = 'Une perturbation a retardé Robert. Réessayez dans un instant.';
+          msg.className = 'erreur';
+          btn.disabled = false;
+          btn.textContent = 'Recevoir Robert';
+        });
+    });
+  </script>
+</body>
+</html>
