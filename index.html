@@ -54,6 +54,91 @@
     }
     .liens a:hover { opacity: 0.5; }
 
+    /* ── Bouton "Voir la vie en cuivré" ── */
+    #btn-cuivre {
+      margin-top: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: none;
+      border: 1px solid #c8a84b;
+      color: #c8a84b;
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 1rem;
+      font-style: italic;
+      padding: 0.45rem 1.1rem;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      letter-spacing: 0.02em;
+    }
+    #btn-cuivre:hover {
+      background: #c8a84b;
+      color: #f7f5f0;
+    }
+    #btn-cuivre .fleche {
+      display: inline-block;
+      transition: transform 0.3s;
+      font-style: normal;
+    }
+    #btn-cuivre.ouvert .fleche { transform: rotate(180deg); }
+
+    /* ── Volet "Voir la vie en cuivré" ── */
+    #volet-cuivre {
+      width: 100%;
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
+      opacity: 0;
+    }
+    #volet-cuivre.ouvert {
+      max-height: 800px;
+      opacity: 1;
+    }
+    #volet-inner {
+      margin-top: 1.2rem;
+      border-top: 1px solid #c8a84b;
+      padding-top: 1.2rem;
+    }
+    #volet-titre {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #c8a84b;
+      text-align: center;
+      margin-bottom: 1.1rem;
+    }
+    .cuivre-grille {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.7rem;
+    }
+    .cuivre-carte {
+      display: block;
+      text-decoration: none;
+      background: #2a2a2a;
+      color: #f7f5f0;
+      border-radius: 4px;
+      padding: 0.8rem 0.9rem;
+      transition: background 0.2s;
+      font-family: 'EB Garamond', Garamond, serif;
+    }
+    .cuivre-carte:hover { background: #c8a84b; }
+    .cuivre-carte-nom {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    .cuivre-carte-desc {
+      font-size: 0.82rem;
+      color: #aaa;
+      margin-top: 0.2rem;
+      font-style: italic;
+      line-height: 1.4;
+    }
+    .cuivre-carte:hover .cuivre-carte-desc { color: #f7f5f0cc; }
+
     /* ── Widget bourse ── */
     #bourse {
       margin-top: 1.5rem;
@@ -241,6 +326,7 @@
       .col-gauche { order: 2; }
       .centre     { order: 1; }
       .col-droite { order: 3; }
+      .cuivre-grille { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -268,9 +354,31 @@
 
     </div>
 
-    <!-- ── Centre : Robert + bourse + liens ── -->
+    <!-- ── Centre : Robert + volet cuivré + bourse + liens ── -->
     <div class="centre">
       <img src="Robert.jpg" alt="Robert">
+
+      <!-- Liens existants -->
+      <div class="liens">
+        <a href="https://qbc.fr" target="_blank" rel="noopener">Pour gazouiller gaiement</a>
+        <a href="creations.html">Créations</a>
+      </div>
+
+      <!-- Bouton volet -->
+      <button id="btn-cuivre" aria-expanded="false" aria-controls="volet-cuivre">
+        <span>Voir la vie en cuivré</span>
+        <span class="fleche" aria-hidden="true">▾</span>
+      </button>
+
+      <!-- Volet pliable -->
+      <div id="volet-cuivre" role="region" aria-label="Voir la vie en cuivré">
+        <div id="volet-inner">
+          <div id="volet-titre">Voir la vie en cuivré</div>
+          <div class="cuivre-grille" id="cuivre-grille">
+            <!-- Les cartes sont chargées depuis cuivre.json -->
+          </div>
+        </div>
+      </div>
 
       <div id="bourse">
         <div id="bourse-header">
@@ -292,10 +400,6 @@
         <div id="bourse-msg">Analyse technique en cours…</div>
       </div>
 
-      <div class="liens">
-        <a href="https://qbc.fr" target="_blank" rel="noopener">Pour gazouiller gaiement</a>
-        <a href="poemes.html">Créations</a>
-      </div>
     </div>
 
     <!-- ── Colonne droite : Robert d'or + Recettes ── -->
@@ -433,6 +537,38 @@
     resizeCanvas();
     tick();
     setInterval(tick, INTERVAL);
+
+    /* ══════════════════════════════════════════
+       VOLET "VOIR LA VIE EN CUIVRÉ"
+       — les cartes sont dans cuivre.json,
+         tu n'as jamais besoin de toucher index.html
+    ══════════════════════════════════════════ */
+    const btn    = document.getElementById('btn-cuivre');
+    const volet  = document.getElementById('volet-cuivre');
+    const grille = document.getElementById('cuivre-grille');
+
+    btn.addEventListener('click', () => {
+      const ouvert = volet.classList.toggle('ouvert');
+      btn.classList.toggle('ouvert', ouvert);
+      btn.setAttribute('aria-expanded', ouvert);
+    });
+
+    fetch('cuivre.json')
+      .then(r => r.json())
+      .then(cartes => {
+        grille.innerHTML = '';
+        cartes.forEach(c => {
+          const a = document.createElement('a');
+          a.className = 'cuivre-carte';
+          a.href = c.url;
+          if (c.externe) { a.target = '_blank'; a.rel = 'noopener'; }
+          a.innerHTML = `<div class="cuivre-carte-nom">${c.nom}</div><div class="cuivre-carte-desc">${c.desc}</div>`;
+          grille.appendChild(a);
+        });
+      })
+      .catch(() => {
+        grille.innerHTML = '<p style="font-family:\'EB Garamond\',serif;font-style:italic;color:#aaa;font-size:0.9rem;">Cuivre en cours d\'extraction…</p>';
+      });
 
     /* ══════════════════════════════════════════
        HOT TAKE
