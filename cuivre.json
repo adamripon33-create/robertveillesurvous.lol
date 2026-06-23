@@ -12,13 +12,13 @@
     "externe": true
   },
   {
-    "nom": "Atelier I",
+    "nom": "Mine d'idées I",
     "desc": "Cuivre en cours d'extraction",
     "url": "atelier-1.html",
     "externe": false
   },
   {
-    "nom": "Atelier II",
+    "nom": "Mines d'idées II",
     "desc": "Cuivre en cours d'extraction",
     "url": "atelier-2.html",
     "externe": false
