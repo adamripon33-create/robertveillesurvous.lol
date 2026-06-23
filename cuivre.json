@@ -1,0 +1,26 @@
+[
+  {
+    "nom": "Créations",
+    "desc": "Poèmes, textes & autres façonnages",
+    "url": "creations.html",
+    "externe": false
+  },
+  {
+    "nom": "Pour gazouiller gaiement",
+    "desc": "Vers un endroit plus doux",
+    "url": "https://qbc.fr",
+    "externe": true
+  },
+  {
+    "nom": "Atelier I",
+    "desc": "Cuivre en cours d'extraction",
+    "url": "atelier-1.html",
+    "externe": false
+  },
+  {
+    "nom": "Atelier II",
+    "desc": "Cuivre en cours d'extraction",
+    "url": "atelier-2.html",
+    "externe": false
+  }
+]
